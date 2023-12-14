@@ -2,11 +2,16 @@ import { useState } from 'react'
 import './App.css'
 import axios from "axios"
 import { useQuery, useMutation } from "react-query"
+import uniqid from 'uniqid';
 
 function App() {
 
-  const [userData, setUserData] = useState({})
-
+  const [userData, setUserData] = useState({
+    email: "",
+    name: "",
+    age: "",
+  })
+  
 
   const HandleChange = (event) => {
     const { name, value } = event.target;
@@ -26,7 +31,21 @@ function App() {
 
   const Posrtdata = async () => {
     try {
-      const response = await axios.post("http://localhost:3100/add", userData);
+      if (userData.name === "" || userData.age === "" || userData.email === "") {
+        alert("Please Add Data")
+        return
+      }
+      const userId = uniqid()
+      const response = await axios.post("http://localhost:3100/add", {
+        ...userData,
+        id:userId
+      });
+      setUserData({
+        name: "",
+        age: "",
+        email: ""
+      })
+      alert(response.data.message)
       return response;
     } catch (error) {
       console.error(error);
@@ -38,7 +57,7 @@ function App() {
   const { mutate, isError } = useMutation(Posrtdata, {
     onSuccess: (success) => {
       refetch()
-    }
+    },
   })
 
   return (
@@ -47,9 +66,11 @@ function App() {
       {isLoading ? <h2>Loading.....</h2> : <div>
         <h2>Length: {data.length}</h2>
         <form action="" onSubmit={(e) => e.preventDefault()}>
-          <input type="text" placeholder='Name' onChange={HandleChange} name='name' />
+          <input type="email" placeholder='Email' value={userData?.email} onChange={HandleChange} name='email' />
           <br /><br />
-          <input type="number" placeholder='Age' onChange={HandleChange} name='age' />
+          <input type="text" placeholder='Name' value={userData?.name} onChange={HandleChange} name='name' />
+          <br /><br />
+          <input type="number" placeholder='Age' value={userData?.age} onChange={HandleChange} name='age' />
           <br /><br />
           <button onClick={() => mutate(userData)}>Send</button>
         </form>

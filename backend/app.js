@@ -9,16 +9,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 const users = [
-    {
-        id: 1,
-        name: "yahya",
-        age: 22
-    },
-    {
-        id: 2,
-        name: "Abdul rehman",
-        age: 21
-    },
+
 ];
 
 app.get("/users", (req, res) => {
@@ -33,11 +24,17 @@ app.get("/users", (req, res) => {
 });
 app.post("/add", (req, res) => {
     const body = req.body;
+    console.log(body)
     try {
-        // Log the request body
-        console.log(body);
-        users.push(body)
-        res.json({ message: "Data received successfully" });
+        const filterData = users.filter((user) => user.email === body.email);
+        if (filterData.length !== 0) {
+            res.json({ message: "User already exist" });
+            return
+        }
+        else {
+            users.push(body)
+            res.json({ message: "Data received successfully" });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
